@@ -1,0 +1,408 @@
+<!--
+    ========================================
+    tux game JUMP - ESTRUTURA HTML
+    ========================================
+    
+    Projeto educacional: Jogo do Mario estilo "endless runner"
+    Objetivo: Demonstrar conceitos de HTML5, CSS3 e JavaScript para desenvolvimento de jogos simples
+    
+    Conceitos abordados:
+    - Estruturação semântica HTML5
+    - Integração de recursos externos (CSS e JavaScript)
+    - Uso de imagens e elementos posicionados
+    - Responsividade básica com viewport
+    
+    Criado por: Carlos Emanuel - mr.carlemanuel@gmail.com
+    Prof. Alexsander Barreto - AlexHolanda.com.br
+    ========================================
+-->
+
+<!DOCTYPE html>
+<!-- 
+    DOCTYPE: Declaração do tipo de documento HTML5
+    Garante que o navegador renderize a página em modo padrão (standards mode)
+    Sem isso, navegadores podem usar modo de compatibilidade (quirks mode)
+-->
+
+<html lang="pt-br">
+  <!-- 
+    Elemento raiz HTML com atributo lang="pt-br"
+    Define o idioma do documento para português brasileiro
+    Importante para: acessibilidade (leitores de tela), SEO e correção ortográfica
+    O atributo lang ajuda ferramentas a entenderem o conteúdo
+-->
+
+  <head>
+    <!-- 
+        SEÇÃO HEAD: Metadados e recursos do documento
+        Contém informações que não são exibidas diretamente na página
+        Inclui: charset, viewport, links para CSS/JS, título, etc.
+    -->
+
+    <meta charset="UTF-8" />
+    <!-- 
+        Charset UTF-8: Codificação de caracteres universal
+        Permite uso de caracteres especiais, acentuação e símbolos diversos
+        UTF-8 suporta todos os caracteres Unicode (incluindo emojis, símbolos, etc.)
+        Sem isso, caracteres especiais podem aparecer como "?" ou ""
+    -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 
+        Viewport: Configuração essencial para responsividade
+        width=device-width: largura se adapta ao dispositivo (mobile, tablet, desktop)
+        initial-scale=1.0: zoom inicial de 100% (sem zoom)
+        Sem isso, sites podem aparecer muito pequenos em dispositivos móveis
+    -->
+
+    <link rel="stylesheet" href="./css/style.css" />
+    <!-- 
+        Link para folha de estilos CSS externa
+        Separação de responsabilidades: HTML (estrutura) | CSS (apresentação)
+        Caminho relativo: ./css/ indica subpasta no mesmo diretório
+        O navegador carrega e aplica os estilos antes de renderizar a página
+    -->
+
+    <script src="./js/script.js" defer></script>
+    <!-- 
+        Script JavaScript externo com atributo DEFER
+        defer: aguarda o HTML ser totalmente carregado antes de executar
+        Garante que os elementos DOM estejam disponíveis para manipulação
+        Alternativa: async (executa assim que disponível, sem aguardar HTML)
+        Sem defer/async, o script bloqueia o carregamento da página
+    -->
+
+    <title>Tux Progamando</title>
+    <!-- 
+        Título da página exibido na aba do navegador
+        Importante para SEO e experiência do usuário
+        Também usado quando a página é salva nos favoritos
+    -->
+  </head>
+
+  <body>
+    <!-- 
+        SEÇÃO BODY: Conteúdo visível da página
+        Todos os elementos que aparecem na tela ficam aqui
+        Esta é a área renderizada pelo navegador
+    -->
+
+    <!-- 
+        ==========================================
+        GAME-BOARD: CONTAINER PRINCIPAL DO JOGO
+        ==========================================
+        Área onde todos os elementos do jogo são posicionados
+        Funciona como "palco" do jogo
+    -->
+    <div class="game-board">
+      <!-- 
+        ==========================================
+        VÍDEO DE FUNDO NO GAME OVER
+        ==========================================
+        Vídeo que aparece quando o jogador perde
+        Reproduz em loop, sem som, e inicia automaticamente
+        Inicialmente oculto (hidden) e aparece via JavaScript
+      -->
+      <video id="gameOverVideo" class="game-over-video" loop muted autoplay hidden>
+        <!-- 
+          loop: vídeo repete infinitamente
+          muted: sem som (necessário para autoplay funcionar em muitos navegadores)
+          autoplay: inicia automaticamente quando visível
+          hidden: oculto inicialmente (atributo HTML5)
+        -->
+        <source src="./tux game img/windows.mp4" type="video/mp4">
+        <!-- 
+          Elemento <source> define o arquivo de vídeo
+          type="video/mp4" informa o formato ao navegador
+          Permite adicionar múltiplos formatos para compatibilidade
+        -->
+      </video>
+      
+      <!-- 
+        ==========================================
+        OVERLAY ESCURO NO GAME OVER
+        ==========================================
+        Camada escura que aparece sobre o jogo quando o jogador perde
+        Melhora contraste e legibilidade do botão de reiniciar
+        Inicialmente oculto (hidden) e aparece via JavaScript
+      -->
+      <div id="gameOverOverlay" class="game-over-overlay" hidden></div>
+      <!-- 
+        id="gameOverOverlay": identificador único para manipulação via JavaScript
+        class="game-over-overlay": classe CSS para estilização
+        hidden: oculto inicialmente (atributo HTML5)
+      -->
+
+      <!-- 
+        ==========================================
+        NUVENS DE CIBERSEGURANÇA ANIMADAS
+        ==========================================
+        Três nuvens que se movem da direita para esquerda
+        Cada uma com posição e timing diferentes
+        Todas usam a mesma imagem mas com classes diferentes para animação
+      -->
+      <!-- Primeira nuvem: começa no topo, sem delay -->
+      <img src="./tux game img/cloud-cyber.png" class="cyber-cloud cloud-1" alt="Nuvem de cibersegurança" />
+      <!-- 
+        src: caminho para a imagem da nuvem
+        class="cyber-cloud cloud-1": classes CSS (cyber-cloud = estilo base, cloud-1 = posição/timing específico)
+        alt: texto alternativo para acessibilidade (leitores de tela)
+      -->
+      
+      <!-- Segunda nuvem: posição média, delay de 8 segundos -->
+      <img src="./tux game img/cloud-cyber.png" class="cyber-cloud cloud-2" alt="Nuvem de cibersegurança" />
+      <!-- 
+        class="cyber-cloud cloud-2": mesma imagem, mas com animação diferente
+        cloud-2 tem delay de 8s, então passa após a primeira nuvem
+      -->
+      
+      <!-- Terceira nuvem: posição mais baixa, delay de 16 segundos -->
+      <img src="./tux game img/cloud-cyber.png" class="cyber-cloud cloud-3" alt="Nuvem de cibersegurança" />
+      <!-- 
+        class="cyber-cloud cloud-3": mesma imagem, mas com animação diferente
+        cloud-3 tem delay de 16s, então passa após a segunda nuvem
+        Todas as nuvens estão animadas e se movem continuamente
+      -->
+
+      <!-- 
+        ==========================================
+        ELEMENTOS ANIMADOS DO WINDOWS
+        ==========================================
+        Container que agrupa todos os elementos decorativos animados
+        Ícones, janelas, vírus, segurança, erros e alertas
+        Todos se movem da direita para esquerda com animações diferentes
+      -->
+      <div class="windows-elements">
+        <!-- 
+          Container principal para todos os elementos decorativos
+          position: absolute cobre toda área do game-board
+          pointer-events: none permite cliques passarem através
+        -->
+        
+        <!-- 
+          ==========================================
+          ÍCONES DO WINDOWS (⊞)
+          ==========================================
+          Símbolo do logo do Windows
+          Quatro ícones em posições diferentes
+        -->
+        <div class="window-icon icon-1">⊞</div>
+        <!-- 
+          class="window-icon icon-1": estilo base + posição/timing específico
+          ⊞: símbolo Unicode do logo do Windows
+        -->
+        <div class="window-icon icon-2">⊞</div>
+        <!-- icon-2: segunda instância com posição e timing diferentes -->
+        <div class="window-icon icon-3">⊞</div>
+        <!-- icon-3: terceira instância -->
+        <div class="window-icon icon-4">⊞</div>
+        <!-- icon-4: quarta instância -->
+        
+        <!-- 
+          ==========================================
+          JANELAS DO WINDOWS (CAIXAS)
+          ==========================================
+          Caixas retangulares que representam janelas do Windows
+          Três janelas em posições diferentes
+        -->
+        <div class="window-box box-1"></div>
+        <!-- 
+          class="window-box box-1": caixa vazia estilizada via CSS
+          Não tem conteúdo, apenas background e border definidos no CSS
+        -->
+        <div class="window-box box-2"></div>
+        <!-- box-2: segunda janela -->
+        <div class="window-box box-3"></div>
+        <!-- box-3: terceira janela -->
+        
+        <!-- 
+          ==========================================
+          SÍMBOLOS DE VÍRUS/MALWARE
+          ==========================================
+          Ícones vermelhos representando ameaças
+          Caveiras (☠) e alertas (⚠)
+        -->
+        <div class="virus-icon virus-1">☠</div>
+        <!-- 
+          class="virus-icon virus-1": estilo vermelho + posição/timing específico
+          ☠: emoji de caveira (símbolo de perigo/vírus)
+        -->
+        <div class="virus-icon virus-2">⚠</div>
+        <!-- virus-2: símbolo de alerta (⚠) -->
+        <div class="virus-icon virus-3">☠</div>
+        <!-- virus-3: segunda caveira -->
+        <div class="virus-icon virus-4">⚠</div>
+        <!-- virus-4: segundo alerta -->
+        
+        <!-- 
+          ==========================================
+          SÍMBOLOS DE SEGURANÇA
+          ==========================================
+          Ícones verdes representando proteção
+          Escudos (🛡) e cadeados (🔒)
+        -->
+        <div class="security-icon security-1">🛡</div>
+        <!-- 
+          class="security-icon security-1": estilo verde + posição/timing específico
+          🛡: emoji de escudo (símbolo de proteção)
+        -->
+        <div class="security-icon security-2">🔒</div>
+        <!-- security-2: emoji de cadeado (símbolo de segurança) -->
+        <div class="security-icon security-3">🛡</div>
+        <!-- security-3: segundo escudo -->
+        
+        <!-- 
+          ==========================================
+          POP-UPS DE ERRO
+          ==========================================
+          Círculos vermelhos com "✕"
+          Representam erros do sistema Windows
+        -->
+        <div class="error-popup popup-1">✕</div>
+        <!-- 
+          class="error-popup popup-1": estilo de círculo vermelho + posição/timing específico
+          ✕: símbolo de "X" (fechar/erro)
+        -->
+        <div class="error-popup popup-2">✕</div>
+        <!-- popup-2: segundo pop-up de erro -->
+        
+        <!-- 
+          ==========================================
+          ÍCONES DE ALERTA
+          ==========================================
+          Caixas laranjas com "!"
+          Representam avisos do sistema
+        -->
+        <div class="alert-icon alert-1">!</div>
+        <!-- 
+          class="alert-icon alert-1": estilo de caixa laranja + posição/timing específico
+          !: símbolo de exclamação (alerta)
+        -->
+        <div class="alert-icon alert-2">!</div>
+        <!-- alert-2: segundo alerta -->
+      </div>
+      <!-- Fim do container windows-elements -->
+
+      <!-- 
+        ==========================================
+        MARIO: PERSONAGEM PRINCIPAL
+        ==========================================
+        Sprite animado do Mario (GIF)
+        Posicionado no chão, à esquerda da tela
+        Pula quando o jogador pressiona uma tecla
+      -->
+      <img src="./tux game img/tux.gif" class="mario" />
+      <!-- 
+        src: caminho para o GIF animado do Mario
+        class="mario": classe CSS que define posição e estilo
+        O pulo é controlado via JavaScript adicionando/removendo classe 'jump'
+      -->
+
+      <!-- 
+        ==========================================
+        CONTAINER DE OBSTÁCULOS
+        ==========================================
+        Área onde os canos (obstáculos) são inseridos dinamicamente
+        Os obstáculos são criados via JavaScript, não estão no HTML inicial
+      -->
+      <div class="obstacles" aria-hidden="true"></div>
+      <!-- 
+        class="obstacles": container para obstáculos gerados dinamicamente
+        aria-hidden="true": informa leitores de tela que este elemento é decorativo
+        Inicialmente vazio, preenchido via JavaScript durante o jogo
+      -->
+      
+      <!-- 
+        ==========================================
+        HUD: INTERFACE DO USUÁRIO
+        ==========================================
+        Placar e recorde exibidos no topo da tela
+        Atualizados dinamicamente via JavaScript
+      -->
+      <div class="hud">
+        <!-- 
+          class="hud": container do HUD (Heads-Up Display)
+          Posicionado no topo esquerdo da tela
+        -->
+        <!-- Elemento de pontuação atual -->
+        <div class="score">Pontuação: <span id="score">0</span></div>
+        <!-- 
+          class="score": estilo do texto de pontuação
+          id="score": identificador único para atualização via JavaScript
+          O número dentro do <span> é atualizado quando o jogador pontua
+        -->
+        
+        <!-- Elemento de recorde (maior pontuação) -->
+        <div class="record">Recorde: <span id="highscore">0</span></div>
+        <!-- 
+          class="record": estilo do texto de recorde
+          id="highscore": identificador único para atualização via JavaScript
+          O número dentro do <span> é atualizado quando um novo recorde é alcançado
+          O recorde é salvo no navegador (localStorage) e persiste entre sessões
+        -->
+      </div>
+      <!-- Fim do HUD -->
+      
+      <!-- 
+        ==========================================
+        CONTAINER DO BOTÃO DE REINICIAR
+        ==========================================
+        Botão centralizado que aparece quando o jogador perde
+        Inicialmente oculto (hidden) e aparece via JavaScript
+      -->
+      <div class="restart-container" hidden>
+        <!-- 
+          class="restart-container": container que centraliza o botão
+          hidden: oculto inicialmente (atributo HTML5)
+          Aparece quando isGameOver = true no JavaScript
+        -->
+        
+        <!-- Fundo animado atrás do botão (ondas concêntricas) -->
+        <div class="restart-background"></div>
+        <!-- 
+          class="restart-background": elemento que cria efeito de ondas
+          Usa pseudo-elementos (::before e ::after) para múltiplas ondas
+          Animação contínua de expansão (ripple effect)
+        -->
+        
+        <!-- Botão de reiniciar -->
+        <button id="restartBtn" class="restart-btn" aria-label="Reiniciar jogo">Reiniciar</button>
+        <!-- 
+          id="restartBtn": identificador único para adicionar event listener
+          class="restart-btn": estilo do botão (gradiente vermelho, sombra, etc.)
+          aria-label: texto para acessibilidade (leitores de tela)
+          Texto "Reiniciar": texto visível no botão
+          Ao clicar, chama função restartGame() no JavaScript
+        -->
+      </div>
+      <!-- Fim do container de reiniciar -->
+    </div>
+    <!-- Fim do game-board -->
+  </body>
+  <!-- 
+    ========================================
+    FIM DA ESTRUTURA HTML
+    
+    FLUXO DO JOGO:
+    1. Página carrega (HTML estrutura os elementos)
+    2. CSS estiliza e anima os elementos
+    3. JavaScript detecta tecla pressionada e executa o pulo
+    4. Loop JavaScript verifica colisões a cada frame (60 FPS)
+    5. Game over quando Mario colide com o cano
+    6. Botão de reiniciar aparece e permite recomeçar
+    
+    ESTRUTURA DE CAMADAS (Z-INDEX):
+    - z-index: 0 = fundo e overlay
+    - z-index: 1 = game-board
+    - z-index: 2 = nuvens e elementos decorativos
+    - z-index: 3 = vídeo de game over
+    - z-index: 4 = overlay escuro
+    - z-index: 5 = obstáculos (canos)
+    - z-index: 6 = Mario
+    - z-index: 10 = HUD (placar)
+    - z-index: 15 = partículas de pontuação
+    - z-index: 20 = botão de reiniciar
+    
+    ========================================
+-->
+</html>

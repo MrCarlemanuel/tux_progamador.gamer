@@ -1,0 +1,1130 @@
+/*
+    ========================================
+    tux game JUMP - ESTILOS CSS
+    ========================================
+    
+    Arquivo de estilos para o tux game Jump
+    
+    Conceitos CSS3 abordados:
+    - Reset CSS (normalização de estilos)
+    - Box Model (box-sizing)
+    - Posicionamento absoluto e relativo
+    - Animações com @keyframes
+    - Gradientes lineares
+    - Transformações e transições
+    Criado por: Carlos Emanuel - mr.carlemanuel@gmail.com
+    Prof. Alexsander Barreto - AlexHolanda.com.br
+    ========================================
+*/
+
+/* 
+    ==========================================
+    RESET CSS - NORMALIZAÇÃO DE ESTILOS
+    ==========================================
+    Seletor universal (*) aplica estilos a TODOS os elementos
+    Remove estilos padrão dos navegadores para garantir consistência
+*/
+* {
+  margin: 0; /* Remove margens padrão dos navegadores (evita espaços indesejados) */
+  padding: 0; /* Remove espaçamentos internos padrão (evita espaços indesejados) */
+  box-sizing: border-box; /* Faz com que width e height incluam padding e border */
+  /* 
+        BOX-SIZING: border-box
+        Mudança no cálculo de dimensões dos elementos
+        width e height incluem padding e border (não apenas o conteúdo)
+        Facilita o controle preciso de tamanhos
+        
+        Exemplo:
+        - width: 100px + padding: 10px + border: 5px
+        - box-sizing: content-box = 130px total (padrão)
+        - box-sizing: border-box = 100px total (recomendado)
+    */
+}
+
+/* 
+    ==========================================
+    GAME-BOARD: ÁREA PRINCIPAL DO JOGO
+    ==========================================
+    Container que funciona como "palco" do jogo
+    Todos os elementos do jogo são posicionados dentro deste container
+*/
+.game-board {
+  width: 100%; /* Largura total da janela do navegador (100% da largura disponível) */
+  height: 100vh; /* Altura fixa da área de jogo (100vh = 100% da altura da viewport) */
+  position: relative; /* Cria contexto de posicionamento para elementos filhos com position: absolute */
+  overflow: hidden; /* Esconde qualquer conteúdo que saia dos limites (essencial para o efeito de "janela") */
+  background: #02142b url('../tux game img/windows-tux-bg.jpg') center / cover no-repeat fixed; /* Imagem de fundo: cor de fallback, imagem centralizada cobrindo toda área, fixa para efeito parallax */
+  z-index: 1; /* Define a ordem de empilhamento (elementos com z-index maior ficam na frente) */
+  transition: transform 0.1s ease; /* Transição suave para transformações (usado no efeito shake) */
+  backface-visibility: hidden; /* Otimização: esconde a parte de trás do elemento durante transformações (melhora performance) */
+}
+
+/* 
+    Overlay escuro sobre o fundo para melhor contraste
+    Pseudo-elemento ::before cria uma camada sem adicionar HTML extra
+*/
+.game-board::before {
+  content: ''; /* Necessário para pseudo-elementos aparecerem (mesmo vazio) */
+  position: absolute; /* Posicionamento absoluto dentro do game-board */
+  inset: 0; /* Atalho para top: 0, right: 0, bottom: 0, left: 0 (cobre toda área) */
+  background: linear-gradient(180deg, rgba(2,10,23,0.3) 0%, rgba(2,10,23,0.2) 50%, rgba(1,5,12,0.4) 100%); /* Gradiente vertical escuro com transparência */
+  pointer-events: none; /* Permite cliques passarem através (não bloqueia interações) */
+  z-index: 0; /* Fica atrás de outros elementos (z-index menor) */
+}
+
+/* 
+    ==========================================
+    EFEITO DE SHAKE (TREMOR)
+    ==========================================
+    Animação aplicada quando o jogador perde
+    Cria efeito visual de impacto
+*/
+.game-board.shake {
+  animation: shake 0.5s ease-in-out; /* Aplica animação de tremor por 0.5 segundos */
+}
+
+/* 
+    Define os quadros-chave da animação de shake
+    Move o elemento horizontalmente para criar efeito de tremor
+*/
+@keyframes shake {
+  0%, 100% { transform: translateX(0); } /* Posição inicial e final: sem movimento */
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); } /* Movimento para esquerda (-10px) */
+  20%, 40%, 60%, 80% { transform: translateX(10px); } /* Movimento para direita (+10px) */
+}
+
+/* 
+    ==========================================
+    PIPE: OBSTÁCULO DO JOGO
+    ==========================================
+    Cano que se move da direita para esquerda
+    Gerado dinamicamente via JavaScript
+*/
+.pipe {
+  position: absolute; /* Remove do fluxo normal, permite posicionamento livre */
+  bottom: 0; /* Posiciona no chão (distância zero do fundo) */
+  width: 100px; /* Largura fixa do cano */
+  z-index: 5; /* Fica acima do fundo mas abaixo do Mario e HUD */
+  will-change: transform; /* Otimização: informa ao navegador que transform será animado (melhora performance) */
+  animation: pipe-animation 1.5s infinite linear; /* Animação contínua: move da direita para esquerda */
+  /* 
+        ANIMAÇÃO CSS:
+        - pipe-animation: nome da animação definida em @keyframes
+        - 1.5s: duração (1.5 segundos para atravessar a tela)
+        - infinite: repete indefinidamente
+        - linear: velocidade constante (sem aceleração/desaceleração)
+    */
+}
+
+/* 
+    ==========================================
+    MARIO: PERSONAGEM PRINCIPAL
+    ==========================================
+    Sprite do Mario que pula ao pressionar tecla
+    Posicionado no chão, à esquerda da tela
+*/
+.mario {
+  width: 120px; /* Largura do sprite do Mario */
+  position: absolute; /* Posicionamento absoluto dentro do game-board */
+  bottom: 0; /* Inicia no chão (mesma base do cano) */
+  image-rendering: pixelated; /* Mantém pixels nítidos (evita suavização em sprites pixel art) */
+  will-change: transform, bottom; /* Otimização: informa que estas propriedades serão animadas */
+  z-index: 6; /* Fica acima dos obstáculos mas abaixo do HUD */
+  /* 
+        Não possui animação por padrão
+        Animação de pulo é adicionada dinamicamente via JavaScript
+        quando a classe 'jump' é aplicada
+    */
+}
+
+/* 
+    ==========================================
+    JUMP: CLASSE DE ANIMAÇÃO DO PULO
+    ==========================================
+    Aplicada dinamicamente pelo JavaScript quando o jogador pressiona uma tecla
+    Remove automaticamente após a animação terminar
+*/
+.jump {
+  animation: jump 500ms ease-out; /* Animação de pulo com duração de 500ms */
+  /* 
+        ANIMAÇÃO DE PULO:
+        - jump: nome da animação @keyframes
+        - 500ms: meio segundo de duração
+        - ease-out: desacelera no final (física natural do pulo)
+        
+        IMPORTANTE: Classe adicionada/removida via JavaScript
+        mario.classList.add('jump')    → inicia pulo
+        mario.classList.remove('jump') → permite novo pulo
+    */
+}
+
+/* 
+    ==========================================
+    NUVENS DE CIBERSEGURANÇA
+    ==========================================
+    Nuvens pixeladas com tema de cibersegurança
+    Movem-se da direita para esquerda em sequência
+    IMPORTANTE: Todas as nuvens devem estar animadas, nenhuma pode ficar estática
+*/
+.cyber-cloud {
+  position: absolute; /* Posicionamento absoluto para controle preciso */
+  width: 250px; /* Largura da nuvem (reduzida de 400px para 250px - menor) */
+  height: auto; /* Altura automática (mantém proporção) */
+  opacity: 0.7; /* Opacidade 70% (semi-transparente) */
+  z-index: 2; /* Fica acima do fundo mas abaixo dos elementos do jogo */
+  image-rendering: pixelated; /* Mantém estilo pixel art nítido */
+  animation: cloud-drift linear infinite; /* Animação contínua de movimento horizontal - OBRIGATÓRIA */
+  pointer-events: none; /* Não intercepta cliques (permite interação com elementos abaixo) */
+  right: -300px; /* Posição inicial: FORA DA TELA à direita (ajustado para o novo tamanho) */
+  /* IMPORTANTE: right inicial garante que a nuvem comece fora da tela, não fixa na tela */
+}
+
+/* Primeira nuvem: começa imediatamente no topo (mais acima) */
+.cloud-1 {
+  top: 10px; /* Posição vertical: 10px do topo (reduzido de 30px - mais acima) */
+  animation-duration: 25s; /* Leva 25 segundos para atravessar a tela */
+  animation-delay: 0s; /* Sem delay: começa imediatamente */
+  /* Garantido: animação sempre ativa, nunca estática */
+}
+
+/* Segunda nuvem: começa 8 segundos depois, mais abaixo (mais acima) */
+.cloud-2 {
+  top: 60px; /* Posição vertical: 60px do topo (reduzido de 120px - mais acima) */
+  animation-duration: 25s; /* Mesma velocidade da primeira */
+  animation-delay: 8s; /* Delay de 8 segundos: passa após a primeira */
+  /* Garantido: animação sempre ativa, nunca estática */
+}
+
+/* Terceira nuvem: começa 16 segundos depois, ainda mais abaixo (mais acima) */
+.cloud-3 {
+  top: 110px; /* Posição vertical: 110px do topo (reduzido de 200px - mais acima) */
+  animation-duration: 25s; /* Mesma velocidade das outras */
+  animation-delay: 16s; /* Delay de 16 segundos: passa após a segunda */
+  /* Garantido: animação sempre ativa, nunca estática */
+}
+
+/* 
+    Animação que move as nuvens da direita para esquerda
+    Define o movimento horizontal contínuo
+    IMPORTANTE: Esta animação é aplicada a TODAS as nuvens
+*/
+@keyframes cloud-drift {
+  from {
+    right: -300px; /* Posição inicial: totalmente fora da tela à direita (ajustado para tamanho menor) */
+    /* Garante que a nuvem comece invisível, fora da tela */
+  }
+  to {
+    right: 100%; /* Posição final: totalmente fora da tela à esquerda (100% = largura total da tela) */
+    /* Garante que a nuvem saia completamente pela esquerda */
+  }
+}
+
+/* 
+    ==========================================
+    ELEMENTOS ANIMADOS DO WINDOWS
+    ==========================================
+    Container que agrupa todos os elementos decorativos animados
+    Ícones, janelas, vírus, segurança, etc.
+*/
+.windows-elements {
+  position: absolute; /* Posicionamento absoluto */
+  inset: 0; /* Atalho para top: 0, right: 0, bottom: 0, left: 0 (cobre toda área) */
+  pointer-events: none; /* Não intercepta cliques (permite interação com jogo) */
+  z-index: 2; /* Fica acima do fundo mas abaixo dos elementos do jogo */
+}
+
+/* 
+    ==========================================
+    ÍCONES DO WINDOWS (⊞)
+    ==========================================
+    Símbolo do logo do Windows
+    Flutuam pela tela com movimento ondulante
+*/
+.window-icon {
+  position: absolute; /* Posicionamento absoluto */
+  font-size: 40px; /* Tamanho do ícone */
+  color: rgba(0, 150, 255, 0.6); /* Cor azul do Windows com 60% de opacidade */
+  text-shadow: 0 0 10px rgba(0, 150, 255, 0.8); /* Sombra azul brilhante (efeito glow) */
+  animation: icon-float linear infinite; /* Animação contínua de flutuação */
+  font-weight: bold; /* Texto em negrito */
+}
+
+/* Primeiro ícone: posição e timing específicos */
+.icon-1 {
+  top: 80px; /* Posição vertical */
+  animation-duration: 20s; /* Velocidade de movimento */
+  animation-delay: 0s; /* Sem delay */
+}
+
+/* Segundo ícone */
+.icon-2 {
+  top: 180px; /* Posição mais abaixo */
+  animation-duration: 25s; /* Velocidade diferente */
+  animation-delay: -8s; /* Delay negativo: começa antes (já está em movimento) */
+}
+
+/* Terceiro ícone */
+.icon-3 {
+  top: 280px; /* Posição ainda mais abaixo */
+  animation-duration: 22s; /* Velocidade diferente */
+  animation-delay: -15s; /* Delay negativo */
+}
+
+/* Quarto ícone */
+.icon-4 {
+  top: 350px; /* Posição próxima ao chão */
+  animation-duration: 28s; /* Velocidade mais lenta */
+  animation-delay: -20s; /* Delay negativo */
+}
+
+/* 
+    Animação de flutuação dos ícones do Windows
+    Combina movimento horizontal com movimento vertical e rotação
+*/
+@keyframes icon-float {
+  from {
+    right: -60px; /* Começa fora da tela à direita */
+    transform: translateY(0) rotate(0deg); /* Sem movimento vertical, sem rotação */
+  }
+  25% {
+    transform: translateY(-20px) rotate(5deg); /* Move para cima e rotaciona levemente */
+  }
+  50% {
+    transform: translateY(0) rotate(0deg); /* Volta ao centro */
+  }
+  75% {
+    transform: translateY(20px) rotate(-5deg); /* Move para baixo e rotaciona no sentido oposto */
+  }
+  to {
+    right: 100%; /* Termina fora da tela à esquerda */
+    transform: translateY(0) rotate(0deg); /* Volta à posição neutra */
+  }
+}
+
+/* 
+    ==========================================
+    JANELAS DO WINDOWS (CAIXAS)
+    ==========================================
+    Caixas retangulares que representam janelas
+    Flutuam pela tela com efeito de escala
+*/
+.window-box {
+  position: absolute; /* Posicionamento absoluto */
+  width: 80px; /* Largura da janela */
+  height: 60px; /* Altura da janela */
+  background: rgba(0, 150, 255, 0.15); /* Fundo azul translúcido (15% opacidade) */
+  border: 2px solid rgba(0, 150, 255, 0.4); /* Borda azul mais visível (40% opacidade) */
+  border-radius: 4px; /* Cantos levemente arredondados */
+  box-shadow: 0 0 15px rgba(0, 150, 255, 0.3); /* Sombra azul brilhante (efeito glow) */
+  animation: box-float linear infinite; /* Animação contínua */
+}
+
+/* Primeira janela */
+.box-1 {
+  top: 100px; /* Posição vertical */
+  animation-duration: 18s; /* Velocidade */
+  animation-delay: -3s; /* Delay negativo */
+}
+
+/* Segunda janela */
+.box-2 {
+  top: 250px; /* Posição mais abaixo */
+  animation-duration: 23s; /* Velocidade diferente */
+  animation-delay: -12s; /* Delay negativo */
+}
+
+/* Terceira janela */
+.box-3 {
+  top: 320px; /* Posição próxima ao chão */
+  animation-duration: 20s; /* Velocidade */
+  animation-delay: -7s; /* Delay negativo */
+}
+
+/* 
+    Animação de flutuação das janelas
+    Inclui fade in/out e efeito de escala
+*/
+@keyframes box-float {
+  from {
+    right: -100px; /* Começa fora da tela */
+    transform: translateY(0) scale(1); /* Sem movimento vertical, tamanho normal */
+    opacity: 0; /* Invisível no início */
+  }
+  10% {
+    opacity: 1; /* Aparece gradualmente */
+  }
+  50% {
+    transform: translateY(-15px) scale(1.1); /* Move para cima e aumenta tamanho */
+  }
+  90% {
+    opacity: 1; /* Ainda visível */
+  }
+  to {
+    right: 100%; /* Termina fora da tela */
+    transform: translateY(0) scale(1); /* Volta ao tamanho normal */
+    opacity: 0; /* Desaparece gradualmente */
+  }
+}
+
+/* 
+    ==========================================
+    SÍMBOLOS DE VÍRUS/MALWARE
+    ==========================================
+    Ícones vermelhos representando ameaças
+    Caveiras (☠) e alertas (⚠)
+*/
+.virus-icon {
+  position: absolute; /* Posicionamento absoluto */
+  font-size: 35px; /* Tamanho do ícone */
+  color: rgba(255, 0, 0, 0.7); /* Cor vermelha com 70% opacidade */
+  text-shadow: 0 0 15px rgba(255, 0, 0, 0.9); /* Sombra vermelha brilhante */
+  animation: virus-float linear infinite; /* Animação contínua */
+  font-weight: bold; /* Texto em negrito */
+  filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.8)); /* Filtro de sombra adicional (efeito glow) */
+}
+
+/* Primeiro vírus: caveira */
+.virus-1 {
+  top: 60px; /* Posição vertical */
+  animation-duration: 19s; /* Velocidade */
+  animation-delay: -2s; /* Delay negativo */
+}
+
+/* Segundo vírus: alerta */
+.virus-2 {
+  top: 140px; /* Posição mais abaixo */
+  animation-duration: 24s; /* Velocidade diferente */
+  animation-delay: -9s; /* Delay negativo */
+}
+
+/* Terceiro vírus: caveira */
+.virus-3 {
+  top: 220px; /* Posição ainda mais abaixo */
+  animation-duration: 21s; /* Velocidade */
+  animation-delay: -16s; /* Delay negativo */
+}
+
+/* Quarto vírus: alerta */
+.virus-4 {
+  top: 300px; /* Posição próxima ao chão */
+  animation-duration: 26s; /* Velocidade mais lenta */
+  animation-delay: -13s; /* Delay negativo */
+}
+
+/* 
+    Animação de flutuação dos vírus
+    Inclui rotação e escala para efeito mais dinâmico
+*/
+@keyframes virus-float {
+  from {
+    right: -50px; /* Começa fora da tela */
+    transform: translateY(0) rotate(0deg) scale(1); /* Posição inicial */
+    opacity: 0; /* Invisível */
+  }
+  10% {
+    opacity: 1; /* Aparece */
+  }
+  25% {
+    transform: translateY(-25px) rotate(15deg) scale(1.2); /* Move para cima, rotaciona e aumenta */
+  }
+  50% {
+    transform: translateY(0) rotate(0deg) scale(1); /* Volta ao centro */
+  }
+  75% {
+    transform: translateY(25px) rotate(-15deg) scale(1.2); /* Move para baixo, rotaciona e aumenta */
+  }
+  90% {
+    opacity: 1; /* Ainda visível */
+  }
+  to {
+    right: 100%; /* Termina fora da tela */
+    transform: translateY(0) rotate(0deg) scale(1); /* Volta à posição inicial */
+    opacity: 0; /* Desaparece */
+  }
+}
+
+/* 
+    ==========================================
+    SÍMBOLOS DE SEGURANÇA
+    ==========================================
+    Ícones verdes representando proteção
+    Escudos (🛡) e cadeados (🔒)
+*/
+.security-icon {
+  position: absolute; /* Posicionamento absoluto */
+  font-size: 32px; /* Tamanho do ícone */
+  color: rgba(0, 255, 0, 0.7); /* Cor verde com 70% opacidade */
+  text-shadow: 0 0 12px rgba(0, 255, 0, 0.8); /* Sombra verde brilhante */
+  animation: security-float linear infinite; /* Animação contínua */
+  filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.6)); /* Filtro de sombra verde */
+}
+
+/* Primeiro símbolo de segurança: escudo */
+.security-1 {
+  top: 70px; /* Posição vertical */
+  animation-duration: 27s; /* Velocidade */
+  animation-delay: -4s; /* Delay negativo */
+}
+
+/* Segundo símbolo: cadeado */
+.security-2 {
+  top: 160px; /* Posição mais abaixo */
+  animation-duration: 22s; /* Velocidade diferente */
+  animation-delay: -11s; /* Delay negativo */
+}
+
+/* Terceiro símbolo: escudo */
+.security-3 {
+  top: 260px; /* Posição ainda mais abaixo */
+  animation-duration: 25s; /* Velocidade */
+  animation-delay: -18s; /* Delay negativo */
+}
+
+/* 
+    Animação de flutuação dos símbolos de segurança
+    Movimento vertical suave com escala
+*/
+@keyframes security-float {
+  from {
+    right: -50px; /* Começa fora da tela */
+    transform: translateY(0) scale(1); /* Posição inicial */
+    opacity: 0; /* Invisível */
+  }
+  10% {
+    opacity: 1; /* Aparece */
+  }
+  30% {
+    transform: translateY(-20px) scale(1.15); /* Move para cima e aumenta */
+  }
+  60% {
+    transform: translateY(20px) scale(1.15); /* Move para baixo e aumenta */
+  }
+  90% {
+    opacity: 1; /* Ainda visível */
+  }
+  to {
+    right: 100%; /* Termina fora da tela */
+    transform: translateY(0) scale(1); /* Volta à posição inicial */
+    opacity: 0; /* Desaparece */
+  }
+}
+
+/* 
+    ==========================================
+    POP-UPS DE ERRO
+    ==========================================
+    Círculos vermelhos com "✕"
+    Representam erros do sistema Windows
+*/
+.error-popup {
+  position: absolute; /* Posicionamento absoluto */
+  width: 50px; /* Largura do círculo */
+  height: 50px; /* Altura do círculo */
+  background: rgba(255, 0, 0, 0.2); /* Fundo vermelho translúcido (20% opacidade) */
+  border: 3px solid rgba(255, 0, 0, 0.6); /* Borda vermelha mais visível (60% opacidade) */
+  border-radius: 50%; /* Forma circular perfeita */
+  display: flex; /* Usa flexbox para centralizar conteúdo */
+  align-items: center; /* Centraliza verticalmente */
+  justify-content: center; /* Centraliza horizontalmente */
+  font-size: 30px; /* Tamanho do símbolo "✕" */
+  font-weight: bold; /* Texto em negrito */
+  color: rgba(255, 0, 0, 0.9); /* Cor vermelha quase opaca */
+  text-shadow: 0 0 10px rgba(255, 0, 0, 1); /* Sombra vermelha brilhante */
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.5); /* Sombra externa vermelha */
+  animation: popup-float linear infinite; /* Animação contínua */
+}
+
+/* Primeiro pop-up de erro */
+.popup-1 {
+  top: 90px; /* Posição vertical */
+  animation-duration: 16s; /* Velocidade */
+  animation-delay: -1s; /* Delay negativo */
+}
+
+/* Segundo pop-up de erro */
+.popup-2 {
+  top: 240px; /* Posição mais abaixo */
+  animation-duration: 21s; /* Velocidade diferente */
+  animation-delay: -14s; /* Delay negativo */
+}
+
+/* 
+    Animação de flutuação dos pop-ups de erro
+    Inclui rotação completa (720 graus) e movimento vertical
+*/
+@keyframes popup-float {
+  from {
+    right: -70px; /* Começa fora da tela */
+    transform: translateY(0) rotate(0deg) scale(0.8); /* Posição inicial: menor e sem rotação */
+    opacity: 0; /* Invisível */
+  }
+  15% {
+    opacity: 1; /* Aparece */
+    transform: translateY(0) rotate(0deg) scale(1); /* Tamanho normal */
+  }
+  30% {
+    transform: translateY(-30px) rotate(180deg) scale(1.2); /* Move para cima, rotaciona 180° e aumenta */
+  }
+  50% {
+    transform: translateY(0) rotate(360deg) scale(1); /* Volta ao centro, completa 1 rotação */
+  }
+  70% {
+    transform: translateY(30px) rotate(540deg) scale(1.2); /* Move para baixo, rotaciona mais */
+  }
+  85% {
+    opacity: 1; /* Ainda visível */
+    transform: translateY(0) rotate(720deg) scale(1); /* Completa 2 rotações totais */
+  }
+  to {
+    right: 100%; /* Termina fora da tela */
+    transform: translateY(0) rotate(720deg) scale(0.8); /* Mantém rotação, diminui tamanho */
+    opacity: 0; /* Desaparece */
+  }
+}
+
+/* 
+    ==========================================
+    ÍCONES DE ALERTA
+    ==========================================
+    Caixas laranjas com "!"
+    Representam avisos do sistema
+*/
+.alert-icon {
+  position: absolute; /* Posicionamento absoluto */
+  width: 45px; /* Largura da caixa */
+  height: 45px; /* Altura da caixa */
+  background: rgba(255, 165, 0, 0.25); /* Fundo laranja translúcido (25% opacidade) */
+  border: 3px solid rgba(255, 165, 0, 0.7); /* Borda laranja mais visível (70% opacidade) */
+  border-radius: 8px; /* Cantos arredondados */
+  display: flex; /* Usa flexbox para centralizar conteúdo */
+  align-items: center; /* Centraliza verticalmente */
+  justify-content: center; /* Centraliza horizontalmente */
+  font-size: 28px; /* Tamanho do símbolo "!" */
+  font-weight: bold; /* Texto em negrito */
+  color: rgba(255, 165, 0, 1); /* Cor laranja opaca */
+  text-shadow: 0 0 8px rgba(255, 165, 0, 0.9); /* Sombra laranja brilhante */
+  box-shadow: 0 0 15px rgba(255, 165, 0, 0.4); /* Sombra externa laranja */
+  animation: alert-float linear infinite; /* Animação contínua */
+}
+
+/* Primeiro alerta */
+.alert-1 {
+  top: 110px; /* Posição vertical */
+  animation-duration: 17s; /* Velocidade */
+  animation-delay: -6s; /* Delay negativo */
+}
+
+/* Segundo alerta */
+.alert-2 {
+  top: 270px; /* Posição mais abaixo */
+  animation-duration: 20s; /* Velocidade diferente */
+  animation-delay: -19s; /* Delay negativo */
+}
+
+/* 
+    Animação de flutuação dos alertas
+    Movimento vertical com escala
+*/
+@keyframes alert-float {
+  from {
+    right: -60px; /* Começa fora da tela */
+    transform: translateY(0) scale(0.9); /* Posição inicial: ligeiramente menor */
+    opacity: 0; /* Invisível */
+  }
+  12% {
+    opacity: 1; /* Aparece */
+    transform: translateY(0) scale(1); /* Tamanho normal */
+  }
+  25% {
+    transform: translateY(-15px) scale(1.1); /* Move para cima e aumenta */
+  }
+  50% {
+    transform: translateY(0) scale(1); /* Volta ao centro */
+  }
+  75% {
+    transform: translateY(15px) scale(1.1); /* Move para baixo e aumenta */
+  }
+  88% {
+    opacity: 1; /* Ainda visível */
+    transform: translateY(0) scale(1); /* Tamanho normal */
+  }
+  to {
+    right: 100%; /* Termina fora da tela */
+    transform: translateY(0) scale(0.9); /* Volta ao tamanho menor */
+    opacity: 0; /* Desaparece */
+  }
+}
+
+/* 
+    ==========================================
+    HUD: PLACAR E CONTROLES
+    ==========================================
+    Interface do usuário no topo da tela
+    Exibe pontuação e recorde
+*/
+.hud {
+  position: absolute; /* Posicionamento absoluto */
+  top: 12px; /* Distância do topo */
+  left: 12px; /* Distância da esquerda */
+  z-index: 10; /* Fica acima de todos os elementos do jogo */
+  display: flex; /* Usa flexbox para organizar elementos horizontalmente */
+  gap: 12px; /* Espaçamento entre elementos filhos */
+  align-items: center; /* Alinha verticalmente ao centro */
+  background: rgba(0, 0, 0, 0.25); /* Fundo preto translúcido (25% opacidade) */
+  padding: 8px 10px; /* Espaçamento interno: 8px vertical, 10px horizontal */
+  border-radius: 8px; /* Cantos arredondados */
+  color: #fff; /* Cor do texto: branco */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; /* Fonte do sistema (moderna) */
+  font-size: 14px; /* Tamanho da fonte */
+}
+
+/* Estilos para os elementos de pontuação e recorde */
+.hud .score,
+.hud .record {
+  font-weight: 600; /* Peso da fonte: semi-negrito */
+  transition: all 0.3s ease; /* Transição suave para mudanças (usado no efeito de pontuação) */
+}
+
+/* 
+    Efeito visual quando o jogador pontua
+    Aplica animação de destaque e muda a cor
+*/
+.hud .score.point-gained {
+  animation: scorePop 0.4s ease; /* Animação de "pop" (crescimento) */
+  color: #4ade80; /* Cor verde para destacar */
+}
+
+/* 
+    Animação de destaque ao pontuar
+    Faz o elemento crescer e voltar ao normal
+*/
+@keyframes scorePop {
+  0% { transform: scale(1); } /* Tamanho normal */
+  50% { transform: scale(1.3); } /* Aumenta 30% no meio da animação */
+  100% { transform: scale(1); } /* Volta ao tamanho normal */
+}
+
+/* 
+    ==========================================
+    PARTÍCULAS DE PONTUAÇÃO
+    ==========================================
+    Efeito visual "+1" que aparece quando o jogador pontua
+    Criado dinamicamente via JavaScript
+*/
+.score-particle {
+  position: absolute; /* Posicionamento absoluto */
+  color: #4ade80; /* Cor verde */
+  font-weight: 700; /* Texto em negrito */
+  font-size: 24px; /* Tamanho grande */
+  pointer-events: none; /* Não intercepta cliques */
+  z-index: 15; /* Fica acima de quase tudo */
+  animation: scoreFloat 1s ease-out forwards; /* Animação única (não repete) */
+}
+
+/* 
+    Animação da partícula de pontuação
+    Move para cima enquanto desaparece e aumenta
+*/
+@keyframes scoreFloat {
+  0% {
+    opacity: 1; /* Totalmente visível */
+    transform: translateY(0) scale(1); /* Posição inicial, tamanho normal */
+  }
+  100% {
+    opacity: 0; /* Totalmente invisível */
+    transform: translateY(-100px) scale(1.5); /* Move 100px para cima e aumenta 50% */
+  }
+}
+
+/* 
+    ==========================================
+    VÍDEO DE FUNDO NO GAME OVER
+    ==========================================
+    Vídeo que aparece quando o jogador perde
+    windows.mp4 reproduzido em loop
+*/
+.game-over-video {
+  position: absolute; /* Posicionamento absoluto */
+  top: 0; /* Começa no topo */
+  left: 0; /* Começa na esquerda */
+  width: 100%; /* Largura total */
+  height: 100%; /* Altura total */
+  object-fit: cover; /* Cobre toda área mantendo proporção (corta se necessário) */
+  z-index: 3; /* Fica acima do fundo mas abaixo do overlay e botão */
+  opacity: 0; /* Inicialmente invisível */
+  transition: opacity 0.5s ease-in-out; /* Transição suave de opacidade */
+}
+
+/* Classe aplicada quando o vídeo deve aparecer */
+.game-over-video.show {
+  opacity: 1; /* Totalmente visível */
+}
+
+/* Esconde o vídeo quando tem atributo hidden */
+.game-over-video[hidden] {
+  display: none; /* Remove completamente do layout */
+}
+
+/* 
+    ==========================================
+    CONTAINER DO BOTÃO DE REINICIAR
+    ==========================================
+    Centraliza o botão na tela
+    Aparece apenas no game over
+*/
+.restart-container {
+  position: absolute; /* Posicionamento absoluto */
+  top: 50%; /* 50% do topo */
+  left: 50%; /* 50% da esquerda */
+  transform: translate(-50%, -50%); /* Move 50% de si mesmo para trás (centraliza perfeitamente) */
+  z-index: 20; /* Fica acima de quase tudo */
+  display: flex; /* Usa flexbox */
+  flex-direction: column; /* Organiza elementos verticalmente */
+  align-items: center; /* Centraliza horizontalmente */
+  justify-content: center; /* Centraliza verticalmente */
+  gap: 20px; /* Espaçamento entre elementos filhos */
+}
+
+/* Esconde o container quando tem atributo hidden */
+.restart-container[hidden] {
+  display: none; /* Remove completamente do layout */
+}
+
+/* 
+    ==========================================
+    FUNDO ANIMADO ATRÁS DO BOTÃO
+    ==========================================
+    Ondas concêntricas que se expandem
+    Cria efeito visual de atenção
+*/
+.restart-background {
+  position: absolute; /* Posicionamento absoluto */
+  width: 300px; /* Largura do círculo */
+  height: 300px; /* Altura do círculo */
+  border-radius: 50%; /* Forma circular perfeita */
+  background: radial-gradient(circle, rgba(255, 71, 87, 0.3) 0%, rgba(255, 71, 87, 0.1) 50%, transparent 70%); /* Gradiente radial vermelho que desaparece nas bordas */
+  animation: ripple 2s infinite ease-out; /* Animação contínua de ondas */
+  z-index: -1; /* Fica atrás do botão */
+}
+
+/* Primeira onda (pseudo-elemento ::before) */
+.restart-background::before {
+  content: ''; /* Necessário para pseudo-elemento aparecer */
+  position: absolute; /* Posicionamento absoluto */
+  width: 100%; /* Mesma largura do elemento pai */
+  height: 100%; /* Mesma altura do elemento pai */
+  border-radius: 50%; /* Forma circular */
+  background: radial-gradient(circle, rgba(255, 71, 87, 0.2) 0%, rgba(255, 71, 87, 0.05) 50%, transparent 70%); /* Gradiente mais suave */
+  animation: ripple 2s infinite ease-out 0.5s; /* Mesma animação com delay de 0.5s */
+}
+
+/* Segunda onda (pseudo-elemento ::after) */
+.restart-background::after {
+  content: ''; /* Necessário para pseudo-elemento aparecer */
+  position: absolute; /* Posicionamento absoluto */
+  width: 100%; /* Mesma largura do elemento pai */
+  height: 100%; /* Mesma altura do elemento pai */
+  border-radius: 50%; /* Forma circular */
+  background: radial-gradient(circle, rgba(255, 71, 87, 0.15) 0%, rgba(255, 71, 87, 0.03) 50%, transparent 70%); /* Gradiente ainda mais suave */
+  animation: ripple 2s infinite ease-out 1s; /* Mesma animação com delay de 1s */
+}
+
+/* 
+    Animação de ondas concêntricas (ripple)
+    Cria efeito de expansão e desaparecimento
+*/
+@keyframes ripple {
+  0% {
+    transform: scale(0.8); /* Tamanho inicial: 80% */
+    opacity: 1; /* Totalmente visível */
+  }
+  50% {
+    transform: scale(1.2); /* Meio da animação: 120% (expande) */
+    opacity: 0.6; /* 60% visível */
+  }
+  100% {
+    transform: scale(1.5); /* Final: 150% (expande mais) */
+    opacity: 0; /* Totalmente invisível */
+  }
+}
+
+/* 
+    ==========================================
+    BOTÃO DE REINICIAR
+    ==========================================
+    Botão estilizado que aparece no game over
+    Centralizado na tela com animação
+*/
+.restart-btn {
+  background: linear-gradient(135deg, #ff4757 0%, #ff6b7a 100%); /* Gradiente diagonal vermelho/rosa */
+  color: #fff; /* Cor do texto: branco */
+  border: none; /* Sem borda */
+  padding: 14px 32px; /* Espaçamento interno: 14px vertical, 32px horizontal */
+  border-radius: 12px; /* Cantos arredondados */
+  cursor: pointer; /* Cursor de mão ao passar o mouse */
+  font-weight: 700; /* Texto em negrito */
+  font-size: 18px; /* Tamanho da fonte */
+  box-shadow: 0 8px 20px rgba(255, 71, 87, 0.4); /* Sombra vermelha */
+  transition: all 0.3s ease; /* Transição suave para todas as propriedades */
+  position: relative; /* Cria contexto para z-index */
+  z-index: 1; /* Fica acima do fundo animado */
+  text-transform: uppercase; /* Texto em maiúsculas */
+  letter-spacing: 1px; /* Espaçamento entre letras */
+}
+
+/* Efeito quando o mouse passa sobre o botão */
+.restart-btn:hover {
+  transform: translateY(-2px); /* Move 2px para cima */
+  box-shadow: 0 12px 28px rgba(255, 71, 87, 0.5); /* Sombra mais intensa */
+  background: linear-gradient(135deg, #ff6b7a 0%, #ff4757 100%); /* Inverte o gradiente */
+}
+
+/* Efeito quando o botão é clicado */
+.restart-btn:active {
+  transform: translateY(0); /* Volta à posição original */
+  box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4); /* Sombra menor (efeito de pressionado) */
+}
+
+/* 
+    Animação pulsante do botão
+    Aplica quando o botão aparece (game over)
+*/
+@keyframes pulse {
+  0% { 
+    transform: scale(1); /* Tamanho normal */
+    box-shadow: 0 8px 20px rgba(255,71,87,0.4); /* Sombra normal */
+  }
+  50% { 
+    transform: scale(1.05); /* Aumenta 5% */
+    box-shadow: 0 12px 30px rgba(255,71,87,0.6); /* Sombra mais intensa */
+  }
+  100% { 
+    transform: scale(1); /* Volta ao tamanho normal */
+    box-shadow: 0 8px 20px rgba(255,71,87,0.4); /* Sombra normal */
+  }
+}
+
+/* Classe aplicada ao botão para ativar animação pulsante */
+.restart-btn.pulse {
+  animation: pulse 1.5s infinite; /* Animação contínua de 1.5 segundos */
+}
+
+/* 
+    ==========================================
+    OVERLAY ESCURO NO GAME OVER
+    ==========================================
+    Camada escura que aparece sobre o jogo
+    Melhora contraste e legibilidade
+*/
+.game-over-overlay {
+  position: absolute; /* Posicionamento absoluto */
+  top: 0; /* Começa no topo */
+  left: 0; /* Começa na esquerda */
+  width: 100%; /* Largura total */
+  height: 100%; /* Altura total */
+  background: rgba(0, 0, 0, 0.5); /* Fundo preto com 50% de opacidade */
+  z-index: 4; /* Fica acima do vídeo mas abaixo do botão */
+  opacity: 0; /* Inicialmente invisível */
+  transition: opacity 0.5s ease-in-out; /* Transição suave de opacidade */
+  pointer-events: none; /* Não intercepta cliques (permite clicar no botão) */
+}
+
+/* Classe aplicada quando o overlay deve aparecer */
+.game-over-overlay.show {
+  opacity: 1; /* Totalmente visível */
+}
+
+/* Esconde o overlay quando tem atributo hidden */
+.game-over-overlay[hidden] {
+  display: none; /* Remove completamente do layout */
+}
+
+/* 
+    ==========================================
+    MELHORIAS RESPONSIVAS
+    ==========================================
+    Ajustes para telas menores (mobile)
+    Media query aplica estilos apenas em telas com largura máxima de 768px
+*/
+@media (max-width: 768px) {
+  /* Botão menor em telas pequenas */
+  .restart-btn {
+    padding: 12px 24px; /* Menos padding */
+    font-size: 16px; /* Fonte menor */
+  }
+  
+  /* Fundo animado menor */
+  .restart-background {
+    width: 250px; /* Largura reduzida */
+    height: 250px; /* Altura reduzida */
+  }
+  
+  /* HUD menor e mais compacto */
+  .hud {
+    font-size: 12px; /* Fonte menor */
+    padding: 6px 8px; /* Menos padding */
+    gap: 8px; /* Menos espaçamento entre elementos */
+  }
+}
+
+/* 
+    ==========================================
+    AJUSTES PARA OBSTÁCULOS
+    ==========================================
+    Estilos aplicados a todos os obstáculos gerados dinamicamente
+*/
+.pipe {
+  position: absolute; /* Posicionamento absoluto */
+  bottom: 0; /* No chão */
+  width: 100px; /* Largura padrão */
+  z-index: 5; /* Fica acima do fundo mas abaixo do Mario e HUD */
+}
+
+/* 
+    Container de obstáculos
+    Agrupa todos os obstáculos em uma camada
+*/
+.obstacles {
+  position: absolute; /* Posicionamento absoluto */
+  inset: 0; /* Cobre toda área do game-board */
+  pointer-events: none; /* Não intercepta cliques (permite interação com HUD) */
+}
+
+/* 
+    ==========================================
+    @KEYFRAMES: DEFINIÇÕES DE ANIMAÇÕES
+    ==========================================
+    Define os quadros-chave (keyframes) das animações CSS
+    Usado para criar movimentos e transições
+*/
+
+/* 
+    ==========================================
+    ANIMAÇÃO DO CANO
+    ==========================================
+    Move o cano da direita para esquerda continuamente
+    Usada para todos os obstáculos
+*/
+@keyframes pipe-animation {
+  from {
+    right: -80px; /* Estado inicial: cano totalmente fora da tela à direita */
+    /* 
+            -80px: posição negativa (largura do próprio cano)
+            Garante que cano apareça gradualmente (não surge do nada)
+        */
+  }
+  to {
+    right: 100%; /* Estado final: cano sai completamente pela esquerda */
+    /* 
+            100%: largura total do game-board
+            Depois disso, animação reinicia (infinite)
+        */
+  }
+}
+
+/* 
+    ==========================================
+    ANIMAÇÃO DO PULO DO MARIO
+    ==========================================
+    Simula física de um pulo com subida, suspensão e descida
+    Aplicada quando a classe 'jump' é adicionada ao Mario
+*/
+@keyframes jump {
+  0% {
+    bottom: 0; /* Início: Mario no chão */
+  }
+  40% {
+    bottom: 180px; /* 40% do tempo: atinge altura máxima */
+    /* 
+            180px: altura suficiente para passar sobre o cano
+            Subida rápida (0% → 40%)
+        */
+  }
+  50% {
+    bottom: 180px; /* 50%: mantém altura (suspensão no ar) */
+    /* 
+            Cria efeito mais realista de pulo
+            Simula momento de "flutuação" no ar
+        */
+  }
+  60% {
+    bottom: 180px; /* 60%: ainda suspenso */
+    /* 
+            Prolonga tempo no ar para facilitar jogabilidade
+            Dá mais tempo para o jogador passar pelos obstáculos
+        */
+  }
+  100% {
+    bottom: 0; /* Final: retorna ao chão */
+    /* 
+            Descida mais lenta (60% → 100%)
+            ease-out torna descida ainda mais suave (física natural)
+        */
+  }
+}
+
+/*
+    ========================================
+    CONCEITOS IMPORTANTES APLICADOS:
+    ========================================
+    
+    1. POSITION (Posicionamento):
+       - relative: cria contexto para filhos absolute
+       - absolute: posicionamento livre em relação ao parent relative
+    
+    2. ANIMAÇÕES CSS:
+       - @keyframes: define os estados da animação
+       - animation: aplica animação ao elemento
+       - Propriedades: nome, duração, repetição, timing
+    
+    3. BOX MODEL:
+       - box-sizing: border-box (facilita cálculos)
+       - width, height, padding, border, margin
+    
+    4. OVERFLOW:
+       - hidden: esconde conteúdo que excede container
+       - Essencial para efeito de "janela" do jogo
+    
+    5. GRADIENTES:
+       - linear-gradient: transição suave entre cores
+       - radial-gradient: gradiente circular
+       - Direções: top to bottom, left to right, diagonais, ângulos
+    
+    6. Z-INDEX:
+       - Controla ordem de empilhamento
+       - Maior valor = mais na frente
+       - Apenas funciona com position diferente de static
+    
+    7. TRANSFORM:
+       - translateX/Y: move elemento
+       - scale: aumenta/diminui tamanho
+       - rotate: rotaciona elemento
+       - Não causa reflow (melhor performance que mudar width/height)
+    
+    8. OPACITY:
+       - Controla transparência (0 = invisível, 1 = opaco)
+       - Pode ser animada suavemente
+       - Não remove elemento do layout (diferente de display: none)
+    
+    ========================================
+    FÍSICA DO JOGO:
+    ========================================
+    
+    - Cano: velocidade constante (linear)
+    - Mario: pulo com ease-out (desaceleração natural)
+    - Colisão: detectada via JavaScript (não CSS)
+    - Pontuação: incrementa quando obstáculo passa completamente pela esquerda
+    
+    ========================================
+    OTIMIZAÇÕES DE PERFORMANCE:
+    ========================================
+    
+    - will-change: informa navegador sobre propriedades que serão animadas
+    - backface-visibility: hidden: otimiza transformações 3D
+    - requestAnimationFrame: sincroniza com taxa de atualização do navegador
+    - pointer-events: none: reduz processamento de eventos desnecessários
+    - image-rendering: pixelated: mantém sprites nítidos sem processamento extra
+    
+    Prof. Alexsander Barreto - AlexHolanda.com.br
+    ========================================
+*/
