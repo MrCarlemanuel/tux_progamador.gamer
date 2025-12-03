@@ -70,4 +70,4 @@ As seguintes recomendações visam aumentar a modularidade e a manutenibilidade 
 
 Clone o repositório:
 ```bash
-git clone [URL-DO-SEU-REPO]
+git clone https://github.com/MrCarlemanuel/tux_progamador.gamer.git
